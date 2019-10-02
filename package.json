@@ -1,0 +1,18 @@
+{
+  "name": "chillout-audio-synthesis",
+  "version": "1.0.0",
+  "repository": "git@github.com:ilyamore88/chillout-audio-synthesis.git",
+  "author": "ilyamore88",
+  "license": "MIT",
+  "private": true,
+  "workspaces": [
+    "frontend"
+  ],
+  "scripts": {
+    "lint": "eslint . --ext .js --ext .vue --fix"
+  },
+  "devDependencies": {
+    "eslint": "^6.5.1",
+    "eslint-config-codex": "github:codex-team/eslint-config"
+  }
+}
