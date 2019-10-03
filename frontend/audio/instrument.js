@@ -10,19 +10,30 @@ class Instrument {
     this.context = context;
     this.oscillatorNode = context.createOscillator();
     this.gainNode = context.createGain();
-    this.setupGain(this.gainNode, 0.35);
+    this.setGainValue(0.35);
     this.setupOscillator(440);
-    this.oscillatorNode.connect(this.gainNode);
+    this.oscillatorNode.start();
     this.gainNode.connect(context.destination);
+    this.notes = [ [], [], [], [], [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88], [], [], [], [] ];
   }
 
   /**
-   * Setup gainNode's value
-   * @param {GainNode} gainNode - gain for this instrument
+   * Set gainNode's value
    * @param {Number} value - new value for gainNode
    */
-  setupGain(gainNode, value) {
-    gainNode.gain.value = value;
+  setGainValue(value) {
+    this.gainNode.gain.setValueAtTime(value, this.context.currentTime);
+  }
+
+  /**
+   * Return gainNode's value. If gainNode === null, return 0.
+   * @return {Number} value - gainNode's value
+   */
+  getGainValue() {
+    if (this.gainNode) {
+      return this.gainNode.gain.value;
+    }
+    return 0;
   }
 
   /**
@@ -38,18 +49,71 @@ class Instrument {
   }
 
   /**
-   * Play one note
-   * @param {String} note - note to play (like A4)
+   * Play melody
+   * @param {Array} noteList - list of notes to play
    */
-  playSound(note) {
-    this.oscillatorNode.start(0);
+  playMelody(noteList) {
+    const now = this.context.currentTime;
+
+    this.startOscillator();
+    noteList.forEach((note, index) => {
+      this.oscillatorNode.frequency.setValueAtTime(this.getFrequency(note), now + (0.3 * index));
+    });
+    setTimeout(() => {
+      this.stopOscillator();
+    }, noteList.length * 300);
   }
 
   /**
-   * Stop playing note
+   * Get frequency of note
+   * @param {String} note - new note (like A4)
+   * @return {Number} frequency - frequency of note
    */
-  stop() {
-    this.oscillatorNode.stop(0);
+  getFrequency(note) {
+    let noteColumn = 0;
+
+    const noteRow = Number(note[1]);
+
+    switch (note[0]) {
+      case 'C':
+        noteColumn = 0;
+        break;
+      case 'D':
+        noteColumn = 1;
+        break;
+      case 'E':
+        noteColumn = 2;
+        break;
+      case 'F':
+        noteColumn = 3;
+        break;
+      case 'G':
+        noteColumn = 4;
+        break;
+      case 'A':
+        noteColumn = 5;
+        break;
+      case 'B':
+        noteColumn = 6;
+        break;
+    }
+    return this.notes[noteRow][noteColumn];
+  }
+
+  /**
+   * Connect oscillator to gainNode
+   */
+  startOscillator() {
+    this.oscillatorNode.connect(this.gainNode);
+    console.log('Connected to gainNode');
+  }
+
+  /**
+   * Disconnect oscillator from gainNode
+   */
+  stopOscillator() {
+    this.oscillatorNode.disconnect(this.gainNode);
+    console.log('Disconnected from gainNode');
   }
 }
 
