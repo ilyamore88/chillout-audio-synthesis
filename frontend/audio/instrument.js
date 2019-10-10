@@ -1,3 +1,5 @@
+import noteFrequencies from './noteFrequencies';
+
 /**
  * Parent class for all instruments
  */
@@ -14,7 +16,6 @@ class Instrument {
     this.setupOscillator(440);
     this.oscillatorNode.start();
     this.gainNode.connect(context.destination);
-    this.notes = [ [], [], [], [], [261.63, 293.66, 329.63, 349.23, 392.00, 440.00, 493.88], [], [], [], [] ];
   }
 
   /**
@@ -49,19 +50,28 @@ class Instrument {
   }
 
   /**
+   * Set oscillator's wave
+   * @param waveType - the shape of waveform to play
+   */
+  setWave(waveType) {
+    this.oscillatorNode.type = waveType;
+  }
+
+  /**
    * Play melody
    * @param {Array} noteList - list of notes to play
    */
   playMelody(noteList) {
     const now = this.context.currentTime;
 
-    this.startOscillator();
     noteList.forEach((note, index) => {
       this.oscillatorNode.frequency.setValueAtTime(this.getFrequency(note), now + (0.3 * index));
     });
-    setTimeout(() => {
-      this.stopOscillator();
-    }, noteList.length * 300);
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        resolve('Melody is done!');
+      }, noteList.length * 300);
+    });
   }
 
   /**
@@ -71,6 +81,11 @@ class Instrument {
    */
   getFrequency(note) {
     let noteColumn = 0;
+
+    // Make pause, when user write one symbol ('.', '_', etc.)
+    if (note.length === 1) {
+      return 0.0;
+    }
 
     const noteRow = Number(note[1]);
 
@@ -97,7 +112,7 @@ class Instrument {
         noteColumn = 6;
         break;
     }
-    return this.notes[noteRow][noteColumn];
+    return noteFrequencies[noteRow][noteColumn];
   }
 
   /**
