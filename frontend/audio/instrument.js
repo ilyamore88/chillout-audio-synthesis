@@ -112,7 +112,8 @@ class Instrument {
         noteColumn = 6;
         break;
     }
-    return noteFrequencies[noteRow][noteColumn];
+    // If note with sharp, return frequency multiplied by two to the power of 1/12
+    return note.length === 2 ? noteFrequencies[noteRow][noteColumn] : noteFrequencies[noteRow][noteColumn] * Math.pow(2, 1 / 12);
   }
 
   /**
