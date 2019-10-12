@@ -23,6 +23,10 @@
       </option>
     </select>
     <input
+      v-model="noteList"
+      type="text"
+    >
+    <input
       :id="$id('gain-value')"
       v-model="gainValue"
       type="range"
@@ -36,10 +40,6 @@
     >
       {{ Math.round(gainValue * 100) }}
     </label>
-    <input
-      v-model="noteList"
-      type="text"
-    >
   </div>
 </template>
 
@@ -53,10 +53,10 @@
         audioCtx: new (AudioContext || window.webkitAudioContext)(),
         currentInstrument: null,
         gainValue: 0.35,
-        noteList: 'C4 D4 E4 F4 G4 A4 B4 B4 A4 G4 F4 E4 D4 C4',
+        noteList: 'E4 G4 A4 B4 G4 B4 B4 A4 A4 G4 G4 E4 E4',
         isPlaying: false,
         waveType: 'sine',
-        waves: ['sine', 'square', 'sawtooth', 'triangle']
+        waves: ['sine', 'square', 'sawtooth', 'triangle', 'piano', 'organ', 'bass', 'bass_sub', 'guitar']
       };
     },
     mounted() {

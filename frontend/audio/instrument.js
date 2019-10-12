@@ -1,4 +1,5 @@
 import noteFrequencies from './noteFrequencies';
+import { createWave } from './waves/waves';
 
 /**
  * Parent class for all instruments
@@ -54,7 +55,17 @@ class Instrument {
    * @param waveType - the shape of waveform to play
    */
   setWave(waveType) {
-    this.oscillatorNode.type = waveType;
+    switch (waveType) {
+      case 'sine':
+      case 'square':
+      case 'sawtooth':
+      case 'triangle':
+        this.oscillatorNode.type = waveType;
+        break;
+      default:
+        this.oscillatorNode.setPeriodicWave(createWave(waveType, this.context));
+        break;
+    }
   }
 
   /**
