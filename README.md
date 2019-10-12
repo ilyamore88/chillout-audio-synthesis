@@ -1,1 +1,2 @@
-# chillout-audio-synthesis
+# Сhillout audio synthesis
+CodeX task solution
