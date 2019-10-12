@@ -88,15 +88,21 @@
       async playMusic() {
         this.isPlaying = true;
         this.$parent.countOfPlaying++;
-        this.currentInstrument.startOscillator();
         while (this.isPlaying) {
-          await this.currentInstrument.playMelody(this.noteList.split(' '));
+          const noteArray = this.noteList.split(' ');
+
+          for (let i = 0; i < noteArray.length; i++) {
+            if (this.isPlaying) {
+              await this.currentInstrument.playNote(noteArray[i]);
+            } else {
+              break;
+            }
+          }
         }
       },
       stopMusic() {
         this.isPlaying = false;
         this.$parent.countOfPlaying--;
-        this.currentInstrument.stopOscillator();
       }
     }
   };

@@ -86,6 +86,24 @@ class Instrument {
   }
 
   /**
+   * Play note
+   * @param {String} note - note to play
+   * @return {Promise}
+   */
+  playNote(note) {
+    this.startOscillator();
+    const now = this.context.currentTime;
+
+    this.oscillatorNode.frequency.setValueAtTime(this.getFrequency(note), now + 0.3);
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        this.stopOscillator();
+        resolve('Note is done!');
+      }, 300);
+    });
+  }
+
+  /**
    * Get frequency of note
    * @param {String} note - new note (like A4)
    * @return {Number} frequency - frequency of note
@@ -132,7 +150,6 @@ class Instrument {
    */
   startOscillator() {
     this.oscillatorNode.connect(this.gainNode);
-    console.log('Connected to gainNode');
   }
 
   /**
@@ -140,7 +157,6 @@ class Instrument {
    */
   stopOscillator() {
     this.oscillatorNode.disconnect(this.gainNode);
-    console.log('Disconnected from gainNode');
   }
 }
 
