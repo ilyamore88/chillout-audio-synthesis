@@ -56,7 +56,8 @@
         noteList: 'E4 G4 A4 B4 G4 B4 B4 A4 A4 G4 G4 E4 E4',
         isPlaying: false,
         waveType: 'sine',
-        waves: ['sine', 'square', 'sawtooth', 'triangle', 'piano', 'organ', 'bass', 'bass_sub', 'guitar']
+        waves: ['sine', 'square', 'sawtooth', 'triangle', 'piano', 'organ', 'bass', 'bass_sub', 'guitar'],
+        playerResolver: null
       };
     },
     mounted() {
@@ -89,19 +90,12 @@
         this.isPlaying = true;
         this.$parent.countOfPlaying++;
         while (this.isPlaying) {
-          const noteArray = this.noteList.split(' ');
-
-          for (let i = 0; i < noteArray.length; i++) {
-            if (this.isPlaying) {
-              await this.currentInstrument.playNote(noteArray[i]);
-            } else {
-              break;
-            }
-          }
+          await this.currentInstrument.playMelody(this.noteList.split(' '));
         }
       },
       stopMusic() {
         this.isPlaying = false;
+        this.currentInstrument.stopOscillator();
         this.$parent.countOfPlaying--;
       }
     }

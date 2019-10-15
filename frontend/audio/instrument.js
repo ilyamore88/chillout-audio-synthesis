@@ -15,7 +15,7 @@ class Instrument {
     this.gainNode = context.createGain();
     this.setGainValue(0.35);
     this.setupOscillator(440);
-    this.oscillatorNode.start();
+    this.oscillatorNode.start(this.context.currentTime);
     this.gainNode.connect(context.destination);
   }
 
@@ -75,12 +75,14 @@ class Instrument {
   playMelody(noteList) {
     const now = this.context.currentTime;
 
+    this.startOscillator();
     noteList.forEach((note, index) => {
       this.oscillatorNode.frequency.setValueAtTime(this.getFrequency(note), now + (0.3 * index));
     });
     return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve('Melody is done!');
+      this.playingTimeout = setTimeout(() => {
+        this.stopOscillator();
+        resolve();
       }, noteList.length * 300);
     });
   }
@@ -98,7 +100,7 @@ class Instrument {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
         this.stopOscillator();
-        resolve('Note is done!');
+        resolve();
       }, 300);
     });
   }
@@ -156,6 +158,8 @@ class Instrument {
    * Disconnect oscillator from gainNode
    */
   stopOscillator() {
+    this.oscillatorNode.frequency.cancelScheduledValues(this.context.currentTime);
+    clearTimeout(this.playingTimeout);
     this.oscillatorNode.disconnect(this.gainNode);
   }
 }
