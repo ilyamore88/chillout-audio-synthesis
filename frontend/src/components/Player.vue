@@ -23,6 +23,10 @@
       </option>
     </select>
     <input
+      v-model="noteList"
+      type="text"
+    >
+    <input
       :id="$id('gain-value')"
       v-model="gainValue"
       type="range"
@@ -36,10 +40,6 @@
     >
       {{ Math.round(gainValue * 100) }}
     </label>
-    <input
-      v-model="noteList"
-      type="text"
-    >
   </div>
 </template>
 
@@ -50,19 +50,34 @@
     name: 'Player',
     data() {
       return {
-        audioCtx: new (AudioContext || window.webkitAudioContext)(),
+        audioCtx: null,
         currentInstrument: null,
         gainValue: 0.35,
-        noteList: 'C4 D4 E4 F4 G4 A4 B4 B4 A4 G4 F4 E4 D4 C4',
+        noteList: 'E4 G4 A4 B4 G4 B4 B4 A4 A4 G4 G4 E4 E4',
         isPlaying: false,
         waveType: 'sine',
-        waves: ['sine', 'square', 'sawtooth', 'triangle']
+        waves: ['sine', 'square', 'sawtooth', 'triangle', 'piano', 'organ', 'bass', 'bass_sub', 'guitar'],
+        playerResolver: null
       };
     },
     mounted() {
-      this.currentInstrument = new Instrument(this.audioCtx);
-      this.currentInstrument.setGainValue(this.gainValue);
-      this.currentInstrument.setWave(this.waveType);
+      const AudioContext = window.AudioContext || // Default
+        window.webkitAudioContext || // Safari and old versions of Chrome
+        false;
+
+      if (AudioContext) {
+        // Do whatever you want using the Web Audio API
+        this.audioCtx = new AudioContext();
+        this.currentInstrument = new Instrument(this.audioCtx);
+        this.currentInstrument.setGainValue(this.gainValue);
+        this.currentInstrument.setWave(this.waveType);
+      } else {
+        /*
+         * Web Audio API is not supported
+         * Alert the user
+         */
+        alert('Sorry, but the Web Audio API is not supported by your browser. Please, consider upgrading to the latest version or downloading Google Chrome or Mozilla Firefox');
+      }
     },
     updated() {
       if (this.currentInstrument) {
@@ -74,15 +89,14 @@
       async playMusic() {
         this.isPlaying = true;
         this.$parent.countOfPlaying++;
-        this.currentInstrument.startOscillator();
         while (this.isPlaying) {
           await this.currentInstrument.playMelody(this.noteList.split(' '));
         }
       },
       stopMusic() {
         this.isPlaying = false;
-        this.$parent.countOfPlaying--;
         this.currentInstrument.stopOscillator();
+        this.$parent.countOfPlaying--;
       }
     }
   };

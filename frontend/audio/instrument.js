@@ -1,4 +1,5 @@
 import noteFrequencies from './noteFrequencies';
+import { createWave } from './waves/waves';
 
 /**
  * Parent class for all instruments
@@ -14,7 +15,7 @@ class Instrument {
     this.gainNode = context.createGain();
     this.setGainValue(0.35);
     this.setupOscillator(440);
-    this.oscillatorNode.start();
+    this.oscillatorNode.start(this.context.currentTime);
     this.gainNode.connect(context.destination);
   }
 
@@ -54,7 +55,17 @@ class Instrument {
    * @param waveType - the shape of waveform to play
    */
   setWave(waveType) {
-    this.oscillatorNode.type = waveType;
+    switch (waveType) {
+      case 'sine':
+      case 'square':
+      case 'sawtooth':
+      case 'triangle':
+        this.oscillatorNode.type = waveType;
+        break;
+      default:
+        this.oscillatorNode.setPeriodicWave(createWave(waveType, this.context));
+        break;
+    }
   }
 
   /**
@@ -64,13 +75,33 @@ class Instrument {
   playMelody(noteList) {
     const now = this.context.currentTime;
 
+    this.startOscillator();
     noteList.forEach((note, index) => {
       this.oscillatorNode.frequency.setValueAtTime(this.getFrequency(note), now + (0.3 * index));
     });
     return new Promise((resolve, reject) => {
-      setTimeout(() => {
-        resolve('Melody is done!');
+      this.playingTimeout = setTimeout(() => {
+        this.stopOscillator();
+        resolve();
       }, noteList.length * 300);
+    });
+  }
+
+  /**
+   * Play note
+   * @param {String} note - note to play
+   * @return {Promise}
+   */
+  playNote(note) {
+    this.startOscillator();
+    const now = this.context.currentTime;
+
+    this.oscillatorNode.frequency.setValueAtTime(this.getFrequency(note), now + 0.3);
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        this.stopOscillator();
+        resolve();
+      }, 300);
     });
   }
 
@@ -121,15 +152,15 @@ class Instrument {
    */
   startOscillator() {
     this.oscillatorNode.connect(this.gainNode);
-    console.log('Connected to gainNode');
   }
 
   /**
    * Disconnect oscillator from gainNode
    */
   stopOscillator() {
+    this.oscillatorNode.frequency.cancelScheduledValues(this.context.currentTime);
+    clearTimeout(this.playingTimeout);
     this.oscillatorNode.disconnect(this.gainNode);
-    console.log('Disconnected from gainNode');
   }
 }
 
